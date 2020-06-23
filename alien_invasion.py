@@ -29,14 +29,7 @@ def run_game():
 
         spray.update()
         # При каждом проходе цикла перерисовывается экран.
-        bullets.update()
-
-        # Удаление пуль, вышедших за край экрана.
-        for bullet in bullets.copy():
-            if bullet.x > ai_settings.screen_width:
-                bullets.remove(bullet)
-        print(len(bullets))
-
+        gf.update_bullets(ai_settings, bullets)
         gf.update_screen(ai_settings, screen, spray, bullets)
 
 
