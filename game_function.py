@@ -14,6 +14,8 @@ def check_keydown_events(event, ai_settings, screen, spray, bullets):
         spray.moving_up = True
     elif event.key == pygame.K_SPACE:
         fire_bullet(ai_settings, screen, spray, bullets)
+    elif event.key == pygame.K_q:
+        sys.exit()
 
 
 def fire_bullet(ai_settings, screen, spray, bullets):
@@ -43,7 +45,7 @@ def check_events(ai_settings, screen, spray, bullets):
             check_keyup_events(event, spray)
 
 
-def update_screen(ai_settings, screen, spray, bullets):
+def update_screen(ai_settings, screen, spray, cat, bullets):
     """Обновляет изображение на экране и отображает новый экран."""
     # При каждом проходе цикла перерисовывается экран.
     screen.fill(ai_settings.bg_color)
@@ -53,6 +55,7 @@ def update_screen(ai_settings, screen, spray, bullets):
         bullet.draw_bullet()
 
     spray.blitme()
+    cat.blitme()
     # Отображение последнего прорисованного экрана.
     pygame.display.flip()
 
