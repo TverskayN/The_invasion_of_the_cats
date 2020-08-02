@@ -5,7 +5,6 @@ from pygame.sprite import Group
 
 from settings import Settings
 from spray import Spray
-from cat import Cat
 import game_function as gf
 
 
@@ -21,11 +20,14 @@ def run_game():
     # Создание пульвелизатора.
     spray = Spray(ai_settings, screen)
 
-    # Создание кота
-    cat = Cat(ai_settings, screen)
-
     # Создание группы для хранения пуль.
     bullets = Group()
+
+    # Создание кота
+    cats = Group()
+
+    # Создание флота пришельцев.
+    gf.create_fleet(ai_settings, screen, spray, cats)
 
     # Запуск нового цикла игры
     while True:
@@ -36,7 +38,7 @@ def run_game():
 
         # При каждом проходе цикла перерисовывается экран.
         gf.update_bullets(ai_settings, bullets)
-        gf.update_screen(ai_settings, screen, spray, cat, bullets)
+        gf.update_screen(ai_settings, screen, spray, cats, bullets)
 
 
 run_game()

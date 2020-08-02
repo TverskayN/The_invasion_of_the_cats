@@ -2,6 +2,7 @@ import sys
 
 import pygame
 from bullet import Bullet
+from cat import Cat
 
 
 def check_keydown_events(event, ai_settings, screen, spray, bullets):
@@ -45,7 +46,7 @@ def check_events(ai_settings, screen, spray, bullets):
             check_keyup_events(event, spray)
 
 
-def update_screen(ai_settings, screen, spray, cat, bullets):
+def update_screen(ai_settings, screen, spray, cats, bullets):
     """Обновляет изображение на экране и отображает новый экран."""
     # При каждом проходе цикла перерисовывается экран.
     screen.fill(ai_settings.bg_color)
@@ -55,7 +56,7 @@ def update_screen(ai_settings, screen, spray, cat, bullets):
         bullet.draw_bullet()
 
     spray.blitme()
-    cat.blitme()
+    cats.draw(screen)
     # Отображение последнего прорисованного экрана.
     pygame.display.flip()
 
@@ -69,3 +70,38 @@ def update_bullets(ai_settings, bullets):
     for bullet in bullets.copy():
         if bullet.x > ai_settings.screen_width:
             bullets.remove(bullet)
+
+def get_number_cat_y(ai_settings, cat_height):
+    """Вычисляет количество котов в столбце."""
+    available_spase_y = ai_settings.screen_height - 2 * cat_height
+    number_cats_y = int(available_spase_y / (2 * cat_height))
+    return number_cats_y
+
+def get_number_columns(ai_settings, cat_width, spray_width):
+    """Вычисляет количество котов в ряду."""
+    available_space_x = ai_settings.screen_width - 3 * cat_width - spray_width
+    number_columns = int(available_space_x / (2 * cat_width))
+    return number_columns
+
+def create_cat(ai_settings, screen, cats, cat_number, column_number):
+    """Создает кота и размещает его в ряду."""
+    cat = Cat(ai_settings, screen)
+    cat_height = cat.rect.height
+    cat.y = cat_height + 2 * cat_height * cat_number
+    cat.rect.y = cat.y
+    cat.rect.x = ai_settings.screen_width - cat.rect.width - 2 * cat.rect.width * column_number
+    cats.add(cat)
+
+def create_fleet(ai_settings, screen, spray, cats):
+    """Создаем флот котов"""
+    # Создание кота и вычисление количества котов в столбце.
+    # Интервал между соседними котами равен высоте одного кота.
+
+    cat = Cat(ai_settings, screen)
+    number_cats_y = get_number_cat_y(ai_settings, cat.rect.height)
+    number_columns = get_number_columns(ai_settings, cat.rect.width, spray.rect.width)
+
+    # Создание первого столбца котов
+    for column_number in range(number_columns):
+        for cat_number in range(number_cats_y):
+            create_cat(ai_settings, screen, cats, cat_number, column_number)
