@@ -16,3 +16,8 @@ class Settings:
         self.bullet_height = 3
         self.bullet_color = 60, 60, 60
         self.bullets_allowed = 3
+        # Настройки котов
+        self.cat_speed_factor = 1
+        self.fleet_drop_speed = 10
+        # fleet_direction = 1 обозначает движение вниз; а -1 - вверх
+        self.fleet_direction = 1

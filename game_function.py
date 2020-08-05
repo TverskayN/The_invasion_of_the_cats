@@ -105,3 +105,23 @@ def create_fleet(ai_settings, screen, spray, cats):
     for column_number in range(number_columns):
         for cat_number in range(number_cats_y):
             create_cat(ai_settings, screen, cats, cat_number, column_number)
+
+def check_fleet_edges(ai_settings, cats):
+    """Реагирует на достижение пришельцем края экрана."""
+    for cat in cats.sprites():
+        if cat.check_adges():
+            change_fleet_direction(ai_settings, cats)
+            break
+
+def change_fleet_direction(ai_settings, cats):
+    """Перемещает влево весь флот и меняет направление флота."""
+    for cat in cats.sprites():
+        cat.rect.x -= ai_settings.fleet_drop_speed
+    ai_settings.fleet_direction *= -1
+
+
+def update_cats(ai_settings, cats):
+    """Проверяет, достиг ли флот края экрана,
+    после чего обновляет аозиции всех котов во фолоте."""
+    check_fleet_edges(ai_settings, cats)
+    cats.update()
