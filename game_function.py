@@ -61,7 +61,7 @@ def update_screen(ai_settings, screen, spray, cats, bullets):
     pygame.display.flip()
 
 
-def update_bullets(ai_settings, bullets):
+def update_bullets(ai_settings, cats,  bullets):
     """Обновляет позиции пуль и уничтожает старые пули."""
     # Обновление позиции пуль.
     bullets.update()
@@ -70,6 +70,10 @@ def update_bullets(ai_settings, bullets):
     for bullet in bullets.copy():
         if bullet.x > ai_settings.screen_width:
             bullets.remove(bullet)
+
+    # Проверка попаданий в котов.
+    # При обнаружении попаданий удалить пулю и кота.
+    collisions = pygame.sprite.groupcollide(bullets, cats, True, True)
 
 def get_number_cat_y(ai_settings, cat_height):
     """Вычисляет количество котов в столбце."""
