@@ -10,8 +10,9 @@ class Settings:
         self.bg_color = (200, 230, 230)
         # Настройки пульвика
         self.spray_speed_factor = 1.5
+        self.spray_limit = 3
         # Параметры пули
-        self.bullet_speed_factor = 1
+        self.bullet_speed_factor = 3
         self.bullet_width = 6
         self.bullet_height = 3
         self.bullet_color = 60, 60, 60

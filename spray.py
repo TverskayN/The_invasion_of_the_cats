@@ -34,3 +34,8 @@ class Spray:
     def blitme(self):
         """Рисует пульвик в текущей позиции."""
         self.screen.blit(self.image, self.rect)
+
+    def center_spray(self):
+        """Размещает корабль в центре левой стороны."""
+        self.rect.centery = self.screen_rect.centery
+

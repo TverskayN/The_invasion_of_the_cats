@@ -4,6 +4,8 @@ import pygame
 from pygame.sprite import Group
 
 from settings import Settings
+from game_stats import GameStats
+
 from spray import Spray
 import game_function as gf
 
@@ -16,6 +18,9 @@ def run_game():
     screen = pygame.display.set_mode((
         ai_settings.screen_width, ai_settings.screen_height))
     pygame.display.set_caption("Cat Invasion")
+
+    # Создание экземпляра для хранения игровой статистики.
+    stats = GameStats(ai_settings)
 
     # Создание пульвелизатора.
     spray = Spray(ai_settings, screen)
@@ -37,8 +42,8 @@ def run_game():
         spray.update()
 
         # При каждом проходе цикла перерисовывается экран.
-        gf.update_bullets(ai_settings, cats, bullets)
-        gf.update_cats(ai_settings, cats)
+        gf.update_bullets(ai_settings, screen, spray, cats, bullets)
+        gf.update_cats(ai_settings, stats, screen, spray, cats, bullets)
         gf.update_screen(ai_settings, screen, spray, cats, bullets)
 
 

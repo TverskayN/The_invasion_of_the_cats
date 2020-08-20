@@ -1,4 +1,5 @@
 import sys
+from time import sleep
 
 import pygame
 from bullet import Bullet
@@ -61,7 +62,7 @@ def update_screen(ai_settings, screen, spray, cats, bullets):
     pygame.display.flip()
 
 
-def update_bullets(ai_settings, cats,  bullets):
+def update_bullets(ai_settings, screen, spray, cats,  bullets):
     """Обновляет позиции пуль и уничтожает старые пули."""
     # Обновление позиции пуль.
     bullets.update()
@@ -71,9 +72,16 @@ def update_bullets(ai_settings, cats,  bullets):
         if bullet.x > ai_settings.screen_width:
             bullets.remove(bullet)
 
-    # Проверка попаданий в котов.
-    # При обнаружении попаданий удалить пулю и кота.
+    check_bullet_cat_collisions(ai_settings, screen, spray, cats, bullets)
+
+def check_bullet_cat_collisions(ai_settings, screen, spray, cats, bullets):
+    """Обработка коллизий пуль с котами"""
+    # Удаление пуль и котов, учавствующих в коллизях.
     collisions = pygame.sprite.groupcollide(bullets, cats, True, True)
+    if len(cats) == 0:
+        # Уничтожение существующих пуль и создание нового флота.
+        bullets.empty()
+        create_fleet(ai_settings, screen, spray, cats)
 
 def get_number_cat_y(ai_settings, cat_height):
     """Вычисляет количество котов в столбце."""
@@ -124,8 +132,40 @@ def change_fleet_direction(ai_settings, cats):
     ai_settings.fleet_direction *= -1
 
 
-def update_cats(ai_settings, cats):
+def spray_hit(ai_settings, stats, screen, spray, cats, bullets):
+    """Обрабатывает столкновение пульвика с котами."""
+    # Уменьшение spray_left.
+    stats.sprays_left -= 1
+
+    # Очистка списков котов и пуль.
+    cats.empty()
+    bullets.empty()
+
+    # Создание нового флота и размещения пульвика в в центре.
+    create_fleet(ai_settings, screen, spray, cats)
+    spray.center_spray()
+
+    # Пауза.
+    sleep(0.5)
+
+def check_cats_left(ai_settings, stats, screen, spray, cats, bullets):
+    """Проверяет, добрались ли пришельцы до нижнего края экрана."""
+    screen_rect = screen.get_rect()
+    for cat in cats.sprites():
+        if cat.rect.left <= screen_rect.left:
+            # Происходит то же, что и при столкновении с кораблем.
+            spray_hit(ai_settings, stats, screen, spray, cats, bullets)
+            break
+
+
+def update_cats(ai_settings, stats, screen, spray, cats, bullets):
     """Проверяет, достиг ли флот края экрана,
-    после чего обновляет аозиции всех котов во фолоте."""
+    после чего обновляет позиции всех котов во фолоте."""
     check_fleet_edges(ai_settings, cats)
     cats.update()
+
+    # Проверка коллизий "кот-пульвик".
+    if pygame.sprite.spritecollideany(spray, cats):
+        spray_hit(ai_settings, stats, screen, spray, cats, bullets)
+    # Проверка котов, добравшихся до нижнего левого края экрана.
+    check_cats_left(ai_settings, stats, screen, spray, cats, bullets)
