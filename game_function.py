@@ -36,7 +36,7 @@ def check_keyup_events(event, spray):
         spray.moving_up = False
 
 
-def check_events(ai_settings, screen, spray, bullets):
+def check_events(ai_settings, screen, stats, play_button, spray, cats, bullets):
     """Обрабатывает нажатие клавиш и события мыши."""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -45,9 +45,31 @@ def check_events(ai_settings, screen, spray, bullets):
             check_keydown_events(event, ai_settings, screen, spray, bullets)
         elif event.type == pygame.KEYUP:
             check_keyup_events(event, spray)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+            check_play_button(ai_settings, screen, stats, play_button, spray,
+                              cats, bullets, mouse_x, mouse_y)
+
+def check_play_button(ai_settings, screen, stats, play_button, spray, cats, bullets, mouse_x, mouse_y):
+    """Запускает новую игру при нажатии кнопки Play."""
+    button_clicked = play_button.rect.collidepoint(mouse_x, mouse_y)
+    if button_clicked and not stats.game_active:
+        # Указатель мыши скрывается.
+        pygame.mouse.set_visible(False)
+        # Сброс игровой статистики.
+        stats.reset_stats()
+        stats.game_active = True
+
+        # Очистка списков пришельцев и пуль.
+        cats.empty()
+        bullets.empty()
+
+        # Создание нового флота и размещение корабля в центре.
+        create_fleet(ai_settings, screen, spray, cats)
+        spray.center_spray()
 
 
-def update_screen(ai_settings, screen, spray, cats, bullets):
+def update_screen(ai_settings, screen, stats, spray, cats, bullets, play_button):
     """Обновляет изображение на экране и отображает новый экран."""
     # При каждом проходе цикла перерисовывается экран.
     screen.fill(ai_settings.bg_color)
@@ -58,6 +80,12 @@ def update_screen(ai_settings, screen, spray, cats, bullets):
 
     spray.blitme()
     cats.draw(screen)
+
+    # Кнопка Play отображается в том случае, если игра неативна.
+    if not stats.game_active:
+        play_button.draw_button()
+        pygame.mouse.set_visible(True)
+
     # Отображение последнего прорисованного экрана.
     pygame.display.flip()
 
@@ -104,7 +132,7 @@ def create_cat(ai_settings, screen, cats, cat_number, column_number):
     cat.rect.x = ai_settings.screen_width - cat.rect.width - 2 * cat.rect.width * column_number
     cats.add(cat)
 
-def create_fleet(ai_settings, screen, spray, cats):
+def create_fleet(ai_settings: object, screen: object, spray: object, cats: object) -> object:
     """Создаем флот котов"""
     # Создание кота и вычисление количества котов в столбце.
     # Интервал между соседними котами равен высоте одного кота.
@@ -134,22 +162,26 @@ def change_fleet_direction(ai_settings, cats):
 
 def spray_hit(ai_settings, stats, screen, spray, cats, bullets):
     """Обрабатывает столкновение пульвика с котами."""
-    # Уменьшение spray_left.
-    stats.sprays_left -= 1
+    if stats.sprays_left > 0:
+        # Уменьшение spray_left.
+        stats.sprays_left -= 1
 
-    # Очистка списков котов и пуль.
-    cats.empty()
-    bullets.empty()
+        # Очистка списков котов и пуль.
+        cats.empty()
+        bullets.empty()
 
-    # Создание нового флота и размещения пульвика в в центре.
-    create_fleet(ai_settings, screen, spray, cats)
-    spray.center_spray()
+        # Создание нового флота и размещения пульвика в в центре.
+        create_fleet(ai_settings, screen, spray, cats)
+        spray.center_spray()
 
-    # Пауза.
-    sleep(0.5)
+        # Пауза.
+        sleep(0.5)
+
+    else:
+        stats.game_active = False
 
 def check_cats_left(ai_settings, stats, screen, spray, cats, bullets):
-    """Проверяет, добрались ли пришельцы до нижнего края экрана."""
+    """Проверяет, добрались ли пришельцы до левого края экрана."""
     screen_rect = screen.get_rect()
     for cat in cats.sprites():
         if cat.rect.left <= screen_rect.left:

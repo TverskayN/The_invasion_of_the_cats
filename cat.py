@@ -20,27 +20,22 @@ class Cat(Sprite):
         self.rect.y = 0
         # Сохранение точной позиции кота
         self.x = float(self.rect.x)
-
-
+        self.y = float(self.rect.y)
 
     def blitme(self):
         """Рисует кота в текущей позиции."""
         self.screen.blit(self.image, self.rect)
 
-
-
     def check_adges(self):
-        """Возвращает True, если пришелец находится у края экрана."""
+        """Возвращает True, если кот находится у края экрана."""
         screen_rect = self.screen.get_rect()
         if self.rect.bottom >= screen_rect.bottom:
             return True
         elif self.rect.top <= 0:
             return True
 
-
-
     def update(self):
-        """Перемещает пришельца вниз или вверх."""
+        """Перемещает кота вниз или вверх."""
         self.y += (self.ai_settings.cat_speed_factor * self.ai_settings.fleet_direction)
         self.rect.y = self.y
 
