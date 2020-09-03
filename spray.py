@@ -1,12 +1,14 @@
 import pygame
+from pygame.sprite import Sprite
 
 
-class Spray:
+class Spray(Sprite):
 
     """Класс реализующий действия пульверизатора (пульвика)."""
 
     def __init__(self, ai_setting, screen):
-        # Инициализирует пульвелизатор и задает его начальное положение.
+        """Инициализирует пульвелизатор и задает его начальное положение."""
+        super(Spray, self).__init__()
         self.screen = screen
         self.ai_setting = ai_setting
         # Загрузка изображения пульвика и получение прямоугольника.

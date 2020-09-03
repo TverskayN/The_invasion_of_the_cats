@@ -65,6 +65,7 @@ def check_play_button(ai_settings, screen, stats, sb, play_button, spray, cats, 
         sb.prep_score()
         sb.prep_high_score()
         sb.prep_level()
+        sb.prep_sprays()
 
         # Очистка списков пришельцев и пуль.
         cats.empty()
@@ -178,11 +179,14 @@ def change_fleet_direction(ai_settings, cats):
     ai_settings.fleet_direction *= -1
 
 
-def spray_hit(ai_settings, stats, screen, spray, cats, bullets):
+def spray_hit(ai_settings, screen, stats, sb, spray, cats, bullets):
     """Обрабатывает столкновение пульвика с котами."""
     if stats.sprays_left > 0:
         # Уменьшение spray_left.
         stats.sprays_left -= 1
+
+        # Обновление игровой информации
+        sb.prep_sprays()
 
         # Очистка списков котов и пуль.
         cats.empty()
@@ -198,17 +202,17 @@ def spray_hit(ai_settings, stats, screen, spray, cats, bullets):
     else:
         stats.game_active = False
 
-def check_cats_left(ai_settings, stats, screen, spray, cats, bullets):
+def check_cats_left(ai_settings, screen, stats, sb, spray, cats, bullets):
     """Проверяет, добрались ли пришельцы до левого края экрана."""
     screen_rect = screen.get_rect()
     for cat in cats.sprites():
         if cat.rect.left <= screen_rect.left:
             # Происходит то же, что и при столкновении с кораблем.
-            spray_hit(ai_settings, stats, screen, spray, cats, bullets)
+            spray_hit(ai_settings, screen, stats, sb, spray, cats, bullets)
             break
 
 
-def update_cats(ai_settings, stats, screen, spray, cats, bullets):
+def update_cats(ai_settings, screen, stats, sb, spray, cats, bullets):
     """Проверяет, достиг ли флот края экрана,
     после чего обновляет позиции всех котов во фолоте."""
     check_fleet_edges(ai_settings, cats)
@@ -216,9 +220,9 @@ def update_cats(ai_settings, stats, screen, spray, cats, bullets):
 
     # Проверка коллизий "кот-пульвик".
     if pygame.sprite.spritecollideany(spray, cats):
-        spray_hit(ai_settings, stats, screen, spray, cats, bullets)
+        spray_hit(ai_settings, screen, stats, sb, spray, cats, bullets)
     # Проверка котов, добравшихся до нижнего левого края экрана.
-    check_cats_left(ai_settings, stats, screen, spray, cats, bullets)
+    check_cats_left(ai_settings, screen, stats, sb, spray, cats, bullets)
 
 def check_high_score(stats, sb):
     """Проверяет, появился ли новый рекорд."""

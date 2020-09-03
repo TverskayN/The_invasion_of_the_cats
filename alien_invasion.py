@@ -50,7 +50,7 @@ def run_game():
 
             # При каждом проходе цикла перерисовывается экран.
             gf.update_bullets(ai_settings, screen, stats, sb,  spray, cats, bullets)
-            gf.update_cats(ai_settings, stats, screen, spray, cats, bullets)
+            gf.update_cats(ai_settings, screen, stats, sb, spray, cats, bullets)
         gf.update_screen(ai_settings, screen, stats, sb, spray, cats, bullets, play_button)
 
 

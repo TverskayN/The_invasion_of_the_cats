@@ -1,4 +1,7 @@
 import pygame.font
+from pygame.sprite import Group
+
+from spray import Spray
 
 class Scoreboard():
     """Класс для вывода игровой информации"""
@@ -15,6 +18,7 @@ class Scoreboard():
         self.prep_score()
         self.prep_high_score()
         self.prep_level()
+        self.prep_sprays()
 
     def prep_score(self):
         """Преобразует текущий счет в графическое изображение."""
@@ -32,6 +36,7 @@ class Scoreboard():
         self.screen.blit(self.score_image, self.score_rect)
         self.screen.blit(self.high_score_image, self.high_score_rect)
         self.screen.blit(self.level_image, self.level_rect)
+        self.sprays.draw(self.screen)
 
     def prep_high_score(self):
         """Преобразует рекордный счет в графическое изображение."""
@@ -52,3 +57,13 @@ class Scoreboard():
         self.level_rect = self.level_image.get_rect()
         self.level_rect.right = self.score_rect.right
         self.level_rect.top = self.score_rect.bottom + 10
+
+    def prep_sprays(self):
+        """Сообщает количество оставшихся кораблей."""
+        self.sprays = Group()
+        for spray_number in range(self.stats.sprays_left):
+            spray = Spray(self.ai_settings, self.screen)
+            spray.rect.x = 10 + spray_number * spray.rect.width
+            spray.rect.y = 10
+            self.sprays.add(spray)
+
