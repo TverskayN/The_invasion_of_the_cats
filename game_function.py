@@ -36,7 +36,7 @@ def check_keyup_events(event, spray):
         spray.moving_up = False
 
 
-def check_events(ai_settings, screen, stats, play_button, spray, cats, bullets):
+def check_events(ai_settings, screen, stats, sb, play_button, spray, cats, bullets):
     """Обрабатывает нажатие клавиш и события мыши."""
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -47,18 +47,24 @@ def check_events(ai_settings, screen, stats, play_button, spray, cats, bullets):
             check_keyup_events(event, spray)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_x, mouse_y = pygame.mouse.get_pos()
-            check_play_button(ai_settings, screen, stats, play_button, spray,
+            check_play_button(ai_settings, screen, stats, sb, play_button, spray,
                               cats, bullets, mouse_x, mouse_y)
 
-def check_play_button(ai_settings, screen, stats, play_button, spray, cats, bullets, mouse_x, mouse_y):
+def check_play_button(ai_settings, screen, stats, sb, play_button, spray, cats, bullets, mouse_x, mouse_y):
     """Запускает новую игру при нажатии кнопки Play."""
     button_clicked = play_button.rect.collidepoint(mouse_x, mouse_y)
     if button_clicked and not stats.game_active:
+        # Сброс игровых настроек.
+        ai_settings.initialize_dynamic_settings()
         # Указатель мыши скрывается.
         pygame.mouse.set_visible(False)
         # Сброс игровой статистики.
         stats.reset_stats()
         stats.game_active = True
+        # Сброс изображений счетов и уровня.
+        sb.prep_score()
+        sb.prep_high_score()
+        sb.prep_level()
 
         # Очистка списков пришельцев и пуль.
         cats.empty()
@@ -69,7 +75,7 @@ def check_play_button(ai_settings, screen, stats, play_button, spray, cats, bull
         spray.center_spray()
 
 
-def update_screen(ai_settings, screen, stats, spray, cats, bullets, play_button):
+def update_screen(ai_settings, screen, stats, sb, spray, cats, bullets, play_button):
     """Обновляет изображение на экране и отображает новый экран."""
     # При каждом проходе цикла перерисовывается экран.
     screen.fill(ai_settings.bg_color)
@@ -80,6 +86,8 @@ def update_screen(ai_settings, screen, stats, spray, cats, bullets, play_button)
 
     spray.blitme()
     cats.draw(screen)
+    # Вывод счета
+    sb.show_score()
 
     # Кнопка Play отображается в том случае, если игра неативна.
     if not stats.game_active:
@@ -90,7 +98,7 @@ def update_screen(ai_settings, screen, stats, spray, cats, bullets, play_button)
     pygame.display.flip()
 
 
-def update_bullets(ai_settings, screen, spray, cats,  bullets):
+def update_bullets(ai_settings, screen, stats, sb, spray, cats,  bullets):
     """Обновляет позиции пуль и уничтожает старые пули."""
     # Обновление позиции пуль.
     bullets.update()
@@ -100,16 +108,26 @@ def update_bullets(ai_settings, screen, spray, cats,  bullets):
         if bullet.x > ai_settings.screen_width:
             bullets.remove(bullet)
 
-    check_bullet_cat_collisions(ai_settings, screen, spray, cats, bullets)
+    check_bullet_cat_collisions(ai_settings, screen, stats, sb, spray, cats, bullets)
 
-def check_bullet_cat_collisions(ai_settings, screen, spray, cats, bullets):
+def check_bullet_cat_collisions(ai_settings, screen, stats, sb, spray, cats, bullets):
     """Обработка коллизий пуль с котами"""
     # Удаление пуль и котов, учавствующих в коллизях.
     collisions = pygame.sprite.groupcollide(bullets, cats, True, True)
+    if collisions:
+        for cats in collisions.values():
+            stats.score += ai_settings.cat_points * len(cats)
+        sb.prep_score()
+        check_high_score(stats, sb)
     if len(cats) == 0:
-        # Уничтожение существующих пуль и создание нового флота.
+        # Если весь флот уничтожен, начинается следующий уровень.
+        ai_settings.increase_speed()
+        # Уничтожение существующих пуль, повышение скорости и создание нового флота.
         bullets.empty()
         create_fleet(ai_settings, screen, spray, cats)
+        # Увеличение уровня.
+        stats.level += 1
+        sb.prep_level()
 
 def get_number_cat_y(ai_settings, cat_height):
     """Вычисляет количество котов в столбце."""
@@ -201,3 +219,9 @@ def update_cats(ai_settings, stats, screen, spray, cats, bullets):
         spray_hit(ai_settings, stats, screen, spray, cats, bullets)
     # Проверка котов, добравшихся до нижнего левого края экрана.
     check_cats_left(ai_settings, stats, screen, spray, cats, bullets)
+
+def check_high_score(stats, sb):
+    """Проверяет, появился ли новый рекорд."""
+    if stats.score > stats.high_score:
+        stats.high_score = stats.score
+        sb.prep_high_score()
